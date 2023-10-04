@@ -1,3 +1,6 @@
 [tool.isort]
 profile = "black"
 combine_as_imports = true
+
+[tool.djlint]
+ignore = "H014"

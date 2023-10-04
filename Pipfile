@@ -9,6 +9,7 @@ python-dotenv = "*"
 
 [dev-packages]
 pre-commit = "*"
+djlint = "*"
 
 [requires]
 python_version = "3.11"
