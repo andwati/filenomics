@@ -22,6 +22,12 @@ load_dotenv()
 # else:
 #     UPLOAD_FOLDER = os.mkdir("uploads")
 
+# Define BASE_DIR as the absolute path to the project's root directory
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
