@@ -1,17 +1,25 @@
+import configparser
 import os
+import re
 from pathlib import Path
+from tempfile import mkstemp
 
 from dotenv import load_dotenv
 from flask import (
     Flask,
+    abort,
     flash,
+    make_response,
     redirect,
     render_template,
     request,
     send_from_directory,
     url_for,
 )
+from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
+
+from .config import ALLOWED_EXTENSIONS
 
 load_dotenv()
 
@@ -22,9 +30,11 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
-
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
-
+config = configparser.ConfigParser()
+config.read(os.path.join(BASE_DIR, "filenomics.ini"))
+# Get the PWHASH from the configuration file
+# Hashed string generated with werkzeug.security.generate_password_hash
+PWHASH = config.get("Security", "PWHASH")
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -33,7 +43,12 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    """
+    Check if the file extension is allowed as well as extentionless files
+    """
+    return (
+        "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    ) or not "." in filename
 
 
 def generate_random_filename(filename):
