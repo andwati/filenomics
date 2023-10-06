@@ -2,8 +2,6 @@ import configparser
 import os
 import re
 import subprocess
-import uuid
-from pathlib import Path
 from tempfile import mkstemp
 
 from dotenv import load_dotenv
@@ -24,12 +22,7 @@ from werkzeug.utils import secure_filename
 from filenomics.process import post_process
 from filenomics.utils import allowed_file, generate_random_filename
 
-from .config import (
-    ALLOWED_EXTENSIONS,
-    OPTIPNG_EXTENSIONS,
-    PURGE_EXTENSIONS,
-    STREAMABLE_EXTENSIONS,
-)
+from .config import ALLOWED_EXTENSIONS, STREAMABLE_EXTENSIONS
 
 load_dotenv()
 
@@ -91,7 +84,7 @@ def upload_file():
                 filename = secure_filename(custom_filename) + "." + extension
                 output = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 if os.path.exists(output):
-                    # if it eists create a temporray file with a unique name
+                    # if it exists create a temporary file with a unique name
                     fd, output = mkstemp(
                         prefix="",
                         dir=app.config["UPLOAD_FOLDER"],
@@ -128,7 +121,7 @@ def upload_file():
                 return full_url
             else:
                 if extension.lower() in STREAMABLE_EXTENSIONS:
-                    return redirect(url_for("download_file", name=filename))
+                    return redirect(url_for("download_file", filename=filename))
 
         else:
             return abort(403)
@@ -136,15 +129,15 @@ def upload_file():
     return render_template("index.html")
 
 
-@app.route("/uploads/<name>")
+@app.route("/uploads/<filename>")
 def download_file(filename):
     extension = filename.rsplit(".", 1)[1].lower()
     filename_without_extension = filename.rsplit(".", 1)[0]
 
-    # if its jpgeg try to find the .lep file that matches the name and stream that into the browser
+    # if its jpeg try to find the .lep file that matches the name and stream that into the browser
     if extension == "jpeg" or extension == "jpg":
         app.logger.info(
-            f"Attempting to stream .lep file for {filename_without_extension}"
+            "Attempting to stream .lep file for" + filename_without_extension
         )
         matching_lep = os.path.join(
             app.config["UPLOAD_FOLDER"], filename_without_extension + ".lep"

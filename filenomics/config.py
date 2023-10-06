@@ -1,3 +1,6 @@
+"""
+configs
+"""
 ALLOWED_EXTENSIONS = set(
     [
         "txt",
