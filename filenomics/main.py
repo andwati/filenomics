@@ -1,6 +1,7 @@
 import configparser
 import os
 import re
+import subprocess
 import uuid
 from pathlib import Path
 from tempfile import mkstemp
@@ -136,5 +137,31 @@ def upload_file():
 
 
 @app.route("/uploads/<name>")
-def download_file(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+def download_file(filename):
+    extension = filename.rsplit(".", 1)[1].lower()
+    filename_without_extension = filename.rsplit(".", 1)[0]
+
+    # if its jpgeg try to find the .lep file that matches the name and stream that into the browser
+    if extension == "jpeg" or extension == "jpg":
+        app.logger.info(
+            f"Attempting to stream .lep file for {filename_without_extension}"
+        )
+        matching_lep = os.path.join(
+            app.config["UPLOAD_FOLDER"], filename_without_extension + ".lep"
+        )
+
+        if os.path.isfile(matching_lep):
+            app.logger.info(
+                f"Found matching .lep file for {filename_without_extension}"
+            )
+            args = ["lepton", "-"]
+            with open(matching_lep, "rb") as inf:
+                proc = subprocess.Popen(args, stdout=subprocess.PIPE, stdin=inf)
+                output = subprocess.Popen.communicate(proc)
+                proc.wait()
+                app.logger.info("Lepton finished processing" + filename)
+            response = make_response(output)
+            response.headers.set("Content-Type", "image/jpeg")
+            return response
+
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
