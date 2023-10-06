@@ -22,6 +22,8 @@ from werkzeug.utils import secure_filename
 
 from filenomics.utils import allowed_file, generate_random_filename
 
+from .config import ALLOWED_EXTENSIONS, OPTIPNG_EXTENSIONS, PURGE_EXTENSIONS
+
 load_dotenv()
 
 
@@ -46,12 +48,22 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
+        # check if the post request has the password part
+        password = request.form.get("password")
+        if not check_password_hash(PWHASH, password):
+            flash("Invalid password")
+            return abort(405)
+
         # check if the post request has the file part
         if "file" not in request.files:
             flash("No file part")
             return redirect(request.url)
 
         file = request.files["file"]
+        custom_extension = request.form.get("custom_extension")
+        preserve_filename = request.form.get("preserve_filename")
+        custom_filename = request.form.get("custom_filename")
+        do_not_redirect = request.form.get("do_not_redirect")
 
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
@@ -59,16 +71,46 @@ def upload_file():
             flash("No selected file")
             return redirect(request.url)
 
-        if file and allowed_file(file.filename):
-            filename = generate_random_filename(file.filename)
-            safe_filename = secure_filename(filename)
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], safe_filename))
-            return redirect(url_for("download_file", name=safe_filename))
-        else:
-            flash("Invalid file type")
-            return redirect(request.url)
+        if file and (allowed_file(file.filename) or custom_extension):
+            if custom_extension in ALLOWED_EXTENSIONS:
+                extension = custom_extension
+            else:
+                if re.search(r"\..", file.filename):
+                    extension = file.filename.rsplit(".", 1)[1].lower()
+                else:
+                    extension = "txt"
 
-    return render_template("index.html")
+            if custom_filename:
+                filename = secure_filename(custom_filename) + "." + extension
+                output = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                if os.path.exists(output):
+                    # if it eists create a temporray file with a unique name
+                    fd, output = mkstemp(
+                        prefix="",
+                        dir=app.config["UPLOAD_FOLDER"],
+                        suffix="_" + filename,
+                    )
+                    os.close(fd)
+
+                    filename = os.path.basename(output)
+                file.save(output)
+        elif preserve_filename:
+            filename = secure_filename(file.filename)
+            output = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+            if os.path.exists(output):
+                output = mkstemp(
+                    prefix="", dir=app.config["UPLOAD_FOLDER"], suffix="_" + filename
+                )[1]
+            file.save(output)
+        else:
+            output = mkstemp(
+                prefix="",
+                dir=app.config["UPLOAD_FOLDER"],
+                suffix="_" + generate_random_filename(file.filename),
+            )[1]
+            filename = os.path.basename(output)
+            file.save(output)
 
 
 @app.route("/uploads/<name>")
