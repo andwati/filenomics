@@ -35,7 +35,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(BASE_DIR, "filenomics.ini"))
 # Get the PWHASH from the configuration file
 # Hashed string generated with werkzeug.security.generate_password_hash
-PWHASH = config.get("Security", "PWHASH")
+PWHASH = config.get("security", "PWHASH")
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
