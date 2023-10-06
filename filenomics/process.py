@@ -2,10 +2,11 @@ import os
 import subprocess
 
 from .config import OPTIPNG_EXTENSIONS, PURGE_EXTENSIONS
-from .main import app
 
 
 def post_process(extension, output):
+    from .main import app
+
     # Remove metadata from files (images and videos)
     if extension.lower() in PURGE_EXTENSIONS:
         app.logger.info("Attempting exiftool purge")

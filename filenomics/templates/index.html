@@ -139,6 +139,13 @@
     <body>
         <div class="container">
             <h1>filenomics~</h1>
+            <ul>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </ul>
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" id="file" required />
                 <br />

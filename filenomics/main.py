@@ -58,7 +58,7 @@ def upload_file():
         password = request.form.get("password")
         if not check_password_hash(PWHASH, password):
             flash("Invalid password")
-            return abort(405)
+            return abort(403)
 
         # check if the post request has the file part
         if "file" not in request.files:
@@ -100,34 +100,39 @@ def upload_file():
 
                     filename = os.path.basename(output)
                 file.save(output)
-        elif preserve_filename:
-            filename = secure_filename(file.filename)
-            output = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            elif preserve_filename:
+                filename = secure_filename(file.filename)
+                output = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-            if os.path.exists(output):
+                if os.path.exists(output):
+                    output = mkstemp(
+                        prefix="",
+                        dir=app.config["UPLOAD_FOLDER"],
+                        suffix="_" + filename,
+                    )[1]
+                file.save(output)
+            else:
                 output = mkstemp(
-                    prefix="", dir=app.config["UPLOAD_FOLDER"], suffix="_" + filename
+                    prefix="",
+                    dir=app.config["UPLOAD_FOLDER"],
+                    suffix="_" + generate_random_filename(file.filename),
                 )[1]
-            file.save(output)
-        else:
-            output = mkstemp(
-                prefix="",
-                dir=app.config["UPLOAD_FOLDER"],
-                suffix="_" + generate_random_filename(file.filename),
-            )[1]
-            filename = os.path.basename(output)
-            file.save(output)
+                filename = os.path.basename(output)
+                file.save(output)
 
-            post_process(extension, output)
+                post_process(extension, output)
 
-        if do_not_redirect:
-            full_url = str(request.base_url) + str(filename) + ""
-            return full_url
+            if do_not_redirect:
+                full_url = str(request.base_url) + str(filename) + ""
+                return full_url
+            else:
+                if extension.lower() in STREAMABLE_EXTENSIONS:
+                    return redirect(url_for("download_file", name=filename))
+
         else:
-            if extension.lower() in STREAMABLE_EXTENSIONS:
-                return redirect(url_for("download_file", name=filename))
-    else:
-        return abort(403)
+            return abort(403)
+
+    return render_template("index.html")
 
 
 @app.route("/uploads/<name>")

@@ -5,7 +5,7 @@ instance/*
 .env
 
 ## uploads
-**/uploads/
+uploads/
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
