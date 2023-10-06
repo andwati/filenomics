@@ -20,9 +20,15 @@ from flask import (
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
+from filenomics.process import post_process
 from filenomics.utils import allowed_file, generate_random_filename
 
-from .config import ALLOWED_EXTENSIONS, OPTIPNG_EXTENSIONS, PURGE_EXTENSIONS
+from .config import (
+    ALLOWED_EXTENSIONS,
+    OPTIPNG_EXTENSIONS,
+    PURGE_EXTENSIONS,
+    STREAMABLE_EXTENSIONS,
+)
 
 load_dotenv()
 
@@ -111,6 +117,17 @@ def upload_file():
             )[1]
             filename = os.path.basename(output)
             file.save(output)
+
+            post_process(extension, output)
+
+        if do_not_redirect:
+            full_url = str(request.base_url) + str(filename) + ""
+            return full_url
+        else:
+            if extension.lower() in STREAMABLE_EXTENSIONS:
+                return redirect(url_for("download_file", name=filename))
+    else:
+        return abort(403)
 
 
 @app.route("/uploads/<name>")
