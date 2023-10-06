@@ -1,6 +1,7 @@
 import configparser
 import os
 import re
+import uuid
 from pathlib import Path
 from tempfile import mkstemp
 
@@ -19,7 +20,7 @@ from flask import (
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
-from .config import ALLOWED_EXTENSIONS
+from filenomics.utils import allowed_file, generate_random_filename
 
 load_dotenv()
 
@@ -40,22 +41,6 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1000 * 1000
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-
-
-def allowed_file(filename):
-    """
-    Check if the file extension is allowed as well as extentionless files
-    """
-    return (
-        "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-    ) or not "." in filename
-
-
-def generate_random_filename(filename):
-    import uuid
-
-    ext = filename.rsplit(".", 1)[1].lower()
-    return f"{uuid.uuid4()}.{ext}"
 
 
 @app.route("/", methods=["GET", "POST"])
