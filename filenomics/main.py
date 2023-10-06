@@ -15,12 +15,6 @@ from werkzeug.utils import secure_filename
 
 load_dotenv()
 
-# BASE_DIR = Path.parent
-
-# if os.path.exists(BASE_DIR  "uploads"):
-#     UPLOAD_FOLDER = "uploads"
-# else:
-#     UPLOAD_FOLDER = os.mkdir("uploads")
 
 # Define BASE_DIR as the absolute path to the project's root directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
