@@ -4,6 +4,12 @@ A file uploader built with Python, Flask
 
 # Stack
 flask
+optipng
+lepton
+
+# Building
+
+flask
 # Features
 - [x] Metadata Purging: Removes metadata from uploaded files (except color profile and orientation).
 - [x] Space Optimization: Losslessly compresses PNG and other file formats using optipng.
