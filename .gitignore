@@ -170,3 +170,8 @@ pyrightconfig.json
 # Ignore all local history of files
 .history
 .ionide
+
+
+# Added by cargo
+
+/target

@@ -126,7 +126,7 @@ def upload_file():
         else:
             return abort(403)
 
-    return render_template("index.html")
+    return render_template("index.n.html")
 
 
 @app.route("/uploads/<filename>")

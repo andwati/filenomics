@@ -9,23 +9,6 @@
         <!-- Include the external JavaScript file -->
         <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     </head>
-    <script>
-        function toggleCustomFilename() {
-            document.getElementById("custom_filename").disabled = document.getElementById("preserve_filename").checked;
-        }
-    </script>
-    <script>
-        function toggleCustomFilename() {
-            var preserveFilenameCheckbox = document.getElementById("preserve_filename");
-            var customFilenameInput = document.getElementById("custom_filename");
-
-            customFilenameInput.disabled = preserveFilenameCheckbox.checked;
-
-            if (preserveFilenameCheckbox.checked) {
-                customFilenameInput.value = "";
-            }
-        }
-    </script>
     <body>
         <div class="container">
             <h1>filenomics~</h1>
@@ -38,14 +21,11 @@
             </ul>
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" id="file" required />
-                <br />
-                <br />
-                <br />
+                
                 <br />
                 <input type="password" name="password" placeholder="Password" required />
                 <br />
-                <br />
-                <br />
+                
                 <input type="submit" value="Upload" />
                 <h4>Optional settings</h4>
                 <input type="text" name="custom_extension" placeholder="Custom extension" />

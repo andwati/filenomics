@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/style.n.css') }}" />
+        <!-- Include the external JavaScript file -->
+        <title>Filenomics</title>
+    </head>
+    <body>
+        <div class="hero">
+            <label for="input-file" id="drop-area">
+                <input type="file" name="" id="input-file" accept="image/*" required />
+                <div id="img-view">
+                    <img src="{{ url_for('static', filename="img/upload.png") }}" alt="" />
+                    <p>
+                        Drag and drop or click here
+                        <br />
+                        to upload image
+                    </p>
+                </div>
+            </label>
+        </div>
+        <script src="{{ url_for('static', filename='js/main.n.js') }}"></script>
+    </body>
+</html>
